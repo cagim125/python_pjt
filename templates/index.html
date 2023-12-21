@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
     <!-- Webpage Title -->
-    <title>모두의 책리뷰</title>
+    <title>나홀로 메모장</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -23,160 +22,128 @@
     <!-- 구글폰트 -->
     <link href="https://fonts.googleapis.com/css?family=Do+Hyeon&display=swap" rel="stylesheet">
 
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $("#reviews-box").html("");
-            showReview();
+        <style type="text/css">
+          * {
+                font-family: "Stylish", sans-serif;
+            }
+            .wrap {
+                width: 900px;
+                margin: auto;
+            }
+            .comment {
+                color: blue;
+                font-weight: bold;
+            }
+            #post-box {
+                width: 500px;
+                margin: 20px auto;
+                padding: 50px;
+                border: black solid;
+                border-radius: 5px;
+            }
+    </style>
+    <script>
+        $(document).ready(function() {
+            $("#cards-box").html("")
+            showArticles();
         });
 
-        function makeReview() {
-            // 화면에 입력 되어있는 제목,저자,리뷰 항목 데이터를 가져옵니다.
-            let title = $("#title").val();
-            let author = $("#author").val();
-            let review = $("#bookReview").val();
-
-            // 제목,저자,리뷰 중 하나라도 입렵하지 않알을 경우 alert 알림
-            // .focus는 커서를 그 위치에 위치시킴
-            if (title === ""){
-                alert("제목을 입력해주세요.");
-                title.focus();
-                return 0;
-            } else if(author === "") {
-                alert("저자를 입력해주세요.");
-                author.focus();
-                return 0;
-            } else if(review === ""){
-                alert("리뷰를 입력해주세요.");
-                review.focus();
-                return 0;
+        function openClose() {
+                // id 값 post-box의 display 값이 block 이면(= 눈에 보이면)
+                if ( $("#post-box").css("display")=="block") {
+                    // post-box를 가리고
+                    $("#post-box").hide();
+                    // 다시 버튼을 클릭하면, 박스 열기를 할 수 있게 텍스트 바꿔두기
+                    $("#btn-post-box").text("포스팅 박스 열기");
+                } else {
+                    // 아니면(눈에 보이지 않으면) post-box를 펴라
+                    $("#post-box").show();
+                    // 다시 버튼을 클릭하면, 박스 닫기를 할 수 있게 텍스트 바꿔두기
+                    $("#btn-post-box").text("포스팅 박스 닫기");
+                }
             }
 
-            // POST /review에 저장(Create)을 요청합니다.
-            // 여기서 이제 웹으로 받은 값을, ajax로 post api를 호출함
+        function postArticle() {
+            let url = $("#post-url").val();
+            let comment = $("#post-comment").val();
+
+            //2.memo에 POST방식으로 메모 생성 요청하기
             $.ajax({
                 type: "POST",
-                url: "/review",
-                data: {title_give: title, author_give: author, review_give: review},
+                url: "/memo",
+                data: {url_give: url, comment_give: comment},
                 success: function(response) {
-                    if(response["result"] === "success") {
-                        alert(response["msg"]);
+                    if (response["result"] == "success") {
+                        alert("포스팅 성공!")
+                        //3. 성공 시 페이지 새로고침하기
                         window.location.reload();
+                    }else{
+                        alert("포스팅 실패!");
                     }
                 }
             })
         }
-        function showReview() {
-            // 리뷰 목록을 서버에 요청하기
+        function showArticles() {
             $.ajax({
                 type: "GET",
-                url: "/review",
+                url: "/memo",
                 data: {},
-                success: function(response) {
-                    // 요청 성공 여부 확인
-                    if(response["result"] === "success"){
-                        let reviews = response["reviews"];
-                        // 요청 성공했을 시 리뷰를 화면에 표시
-                        for(let i = 0; i < reviews.length; i++){
-                            makeCard(reviews[i]["title"],reviews[i]["author"],reviews[i]["review"])
-                        }
-                    }else {
-                            alert("정상적으로 데이터를 받아오지 못했습니다.")
-                        }
+                success: function(response){
+                    let article = response["article"];
+                    console.log(article);
+                    for(let i = 0; i < article.length; i++){
+                        makeCard(article[i]["image"],article[i]["url"],article[i]["title"],article[i]["desc"],article[i]["comment"]);
+                    }
                 }
             })
         }
-        function makeCard(title,author,review){
-            let tempHtml = `<tr>
-                          <td>${title}</td>
-                          <td>${author}</td>
-                          <td>${review}</td>
-                          </tr>`
-            $("#reviews-box").append(tempHtml);
-
-        }
-        function validateLength(obj) {
-            let content = $(obj).val();
-            if (content.length > 140) {
-                alert("리뷰는 140자까지 기록할 수 있습니다.");
-                $(obj).val(content.substring(0, content.length - 1));
+        function makeCard(image, url, title, desc, comment) {
+                let tempHtml = `<div class="card">
+                        <img class="card-img-top" src="${image}" alt="Card image cap">
+                        <div class="card-body">
+                        <a href="${url}" target="_blank" class="card-title">${title}</a>
+                        <p class="card-text">${desc}</p>
+                        <p class="card-text comment">${comment}</p>
+                        </div>
+                    </div>`;
+                $("#cards-box").append(tempHtml);
             }
-        }
     </script>
-
-    <style type="text/css">
-        * {
-            font-family: "Do Hyeon", sans-serif;
-        }
-
-        h1,
-        h5 {
-            display: inline;
-        }
-
-        .info {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        .review {
-            text-align: center;
-        }
-
-        .reviews {
-            margin-top: 100px;
-        }
-    </style>
-
 </head>
-
 <body>
-<div class="container">
-<!--    <img src="https://previews.123rf.com/images/maxxyustas/maxxyustas1511/maxxyustas151100002/47858355-education-concept-books-and-textbooks-on-the-bookshelf-3d.jpg"-->
-<!--         class="img-fluid" alt="Responsive image">-->
-    <div class="info">
-        <h1>읽은 책에 대해 말씀해주세요.</h1>
-        <p>다른 사람을 위해 리뷰를 남겨주세요! 다 같이 좋은 책을 읽는다면 다 함께 행복해질 수 있지 않을까요?</p>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text">제목</span>
+<div class="wrap">
+    <div class="jumbotron">
+        <h1 class="display-4">나홀로 링크 메모장!</h1>
+        <p class="lead">중요한 링크를 저장해두고, 나중에 볼 수 있는 공간입니다</p>
+        <hr class="my-4">
+        <p class="lead">
+            <button onclick="openClose()" id="btn-post-box" type="button" class="btn btn-primary">포스팅 박스 열기</button>
+        </p>
+    </div>
+    <div id="post-box" class="form-post" style="display:none">
+        <div>
+            <div class="form-group">
+                <label for="post-url">아티클 URL</label>
+                <input id="post-url" class="form-control" placeholder="">
             </div>
-            <input type="text" class="form-control" id="title">
-        </div>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text">저자</span>
+            <div class="form-group">
+                <label for="post-comment">간단 코멘트</label>
+                <textarea id="post-comment" class="form-control" rows="2"></textarea>
             </div>
-            <input type="text" class="form-control" id="author">
-        </div>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text">리뷰</span>
-            </div>
-            <textarea class="form-control" id="bookReview"
-                      cols="30"
-                      rows="5" placeholder="140자까지 입력할 수 있습니다." onkeyup="validateLength(this)"></textarea>
-        </div>
-        <div class="review">
-            <button onclick="makeReview()" type="button" class="btn btn-primary">리뷰 작성하기</button>
+            <button type="button" class="btn btn-primary" onclick="postArticle()">기사저장</button>
         </div>
     </div>
-    <div class="reviews">
-        <table class="table">
-            <thead>
-            <tr>
-                <th scope="col">제목</th>
-                <th scope="col">저자</th>
-                <th scope="col">리뷰</th>
-            </tr>
-            </thead>
-            <tbody id="reviews-box">
-            <tr>
-                <td>왕초보 8주 코딩</td>
-                <td>김르탄</td>
-                <td>역시 왕초보 코딩교육의 명가답군요. 따라하다보니 눈 깜짝할 사이에 8주가 지났습니다.</td>
-            </tr>
-            </tbody>
-        </table>
+    <div id="cards-box"  class="card-columns" >
+        <div class="card">
+            <img class="card-img-top"
+                 src="https://www.eurail.com/content/dam/images/eurail/Italy%20OCP%20Promo%20Block.adaptive.767.1535627244182.jpg"
+                 alt="Card image cap">
+            <div class="card-body">
+                <a href="#" class="card-title">여기 기사 제목이 들어가죠</a>
+                <p class="card-text">기사의 요약 내용이 들어갑니다. 동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라만세 무궁화 삼천리 화려강산...</p>
+                <p class="card-text comment">여기에 코멘트가 들어갑니다.</p>
+            </div>
+        </div>
     </div>
 </div>
 </body>
