@@ -6,7 +6,7 @@ from pymongo import MongoClient
 app = Flask(__name__)
 DB_HOST = 'localhost:27017'
 client = MongoClient(DB_HOST)
-db = client.sparta
+db = client.movieDB
 
 # daum_url = "https://movie.daum.net/ranking/reservation"
 
@@ -17,24 +17,40 @@ def home(): #함수명수정-이름만보고접속되는페이지를확인할수
 
 @app.route('/api/list', methods=['GET'])
 def api_list():
-    db = client.daum_movie
-    movie = list(db.movie.find({}, {'_id': 0}))
-    return jsonify({'result':'success' ,'data': movie})
 
+    # {} : DB에 있는 값을 다 가지고 오라는 뜻
+    # {'_id':False} : _id컬럼은 가지고 오지 않는다
+    # .sort('like',-1) : 1 : 오름차순, -1 : 내림차순
+    movie = list(db.movie.find({},{'_id':False}).sort('like',-1))
+    return jsonify({'result':'success','data': movie})
+
+@app.route('/api/like', methods=['POST'])
+def like_up():
+    # 1. 클라이언트가 전달한 name_give를 name_receive 변수에 넣습니다.
+    title_receive = request.form['title_give']
+    # 2. mystar 목록에서 find_one으로 name이 name_receive와 일치하는 star를 찾습니다.
+    star = db.movie.find_one({'title': title_receive})
+    # 3. star의 like 에 1을 더해준 new_like 변수를 만듭니다.
+    new_like = star['like'] + 1
+    # 4. mystar 목록에서 name이 name_receive인 문서의 like 를 new_like로 변경합니다.
+    # 참고: '$set' 활용하기!
+    db.movie.update_one({'title': title_receive}, {'$set': {'like': new_like}})
+    # 5. 성공하면 success 메시지를 반환합니다. 성공했따는것을 알려주기 위함.
+    return jsonify({'result': 'success'})
 
 @app.route("/order", methods=['POST'])
 def write_order():
     # 1.클라이언트로 부터 넘어온 데이터 받기
-    name_recieve = request.form["name_give"]
-    addr_recieve = request.form["addr_give"]
-    phone_recieve = request.form["phone_give"]
-    # count_recieve = request.form["count_give"]
+    name_receive = request.form["name_give"]
+    addr_receive = request.form["addr_give"]
+    phone_receive = request.form["phone_give"]
+    # count_receive = request.form["count_give"]
 
     order = {
-        "name": name_recieve,
-        "address": addr_recieve,
-        "phone": phone_recieve,
-        # "count": count_recieve
+        "name": name_receive,
+        "address": addr_receive,
+        "phone": phone_receive,
+        # "count": count_receive
     }
     db.orders.insert_one(order)
 
@@ -47,12 +63,12 @@ def get_orders():
 @app.route("/memo", methods=['POST'])
 def write_memo():
     # 1.클라이언트로부터 데이터 받기
-    url_recieve = request.form['url_give'] # url_recieve로 클라이언트가 준 url 가져오기
-    comment_recieve = request.form['comment_give'] # comment_recieve로 클라이언트가 준 commnet 가져오기
+    url_receive = request.form['url_give'] # url_recieve로 클라이언트가 준 url 가져오기
+    comment_receive = request.form['comment_give'] # comment_recieve로 클라이언트가 준 commnet 가져오기
 
     # 2.meta tag를 스크래핑하기
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-    data = requests.get(url_recieve, headers=headers)
+    data = requests.get(url_receive, headers=headers)
     soup = BeautifulSoup(data.text, 'html.parser')
 
     og_image = soup.select_one('meta[property="og:image"]')
@@ -64,11 +80,11 @@ def write_memo():
     url_description = og_description['content']
 
     article = {
-        'url': url_recieve,
+        'url': url_receive,
         'title': url_title,
         'desc': url_description,
         'image': url_image,
-        'comment': comment_recieve
+        'comment': comment_receive
     }
     print(article)
     # 3. mongoDB에 데이터 넣기

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <!-- Webpage Title -->
-    <title>1페이지 홈쇼핑</title>
+    <title>영화 순위</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -26,7 +26,6 @@
     <link rel="stylesheet" type="text/css" href="../static/style.css"/>
 
     <script>
-        let count;
         $(document).ready(function () {
             $('#list_movieranking').html('');
             $.ajax({
@@ -38,47 +37,53 @@
                         let data = response['data']
                         for (let i = 0; data.length; i++) {
                             let movie_title = data[i]["title"];
-                            let movie_img_url = data[i]["image"];
+                            let movie_img_url = data[i]["image_url"];
                             let movie_year = data[i]["year"];
                             let movie_url = data[i]["url"];
                             let movie_like = data[i]["like"];
 
-                            let addList =
-                                `
-
-                                        <li>
-                                            <a href=${movie_url}>
-                                            <img class="card-img-top" src=${movie_img_url} alt="Card image cap">
-                                            </a>
-                                            <div class="card-body">
-                                                    <h5 class="card-title">${movie_title}</h5>
-                                                 <span>
-                                                 <img  onclick="counter()" alt="heart" src="../static/heart.jpg" width="30" height="30"/>
-                                                  <p>${movie_like}</p>
-                                                </span>
-                                                <div class="txt_tump">
-                                                 <span class="txt_info">
-                                                    개봉
-                                                 <span class="txt_num">${movie_year}</span>
-                                                </div>
-                                             </span>
-                                              </div>
-                                        </li>
-
-                                            `;
+                            let addList = `
+                            <li>
+          <a href=${movie_url}>
+              <img class="card-img-top" src=${movie_img_url} alt="Card image cap">
+              </a>
+               <div class="card-body">
+                         <h5 class="card-title">${movie_title}</h5>
+                 <a href="#" onclick="likeup('${movie_title}')" class="card-footer-item has-text-info">
+                 <img alt="heart" src="../static/heart.jpg" width="30" height="30"/>
+                 ${movie_like}
+                 </a>
+                 <div class="txt_tump">
+                <span class="txt_info">
+                      개봉
+                <span class="txt_num">${movie_year}</span>
+               </div>
+                    </span>
+                </div>
+          </li>`;
                             $("#list_movieranking").append(addList);
                         }
                     }
                 }
             })
         });
-        function counter() {
-
+   function likeup(name) {
+            // 1. 서버에 1) POST 방식으로,
+            // 2) /api/like 라는 url에, 3) name_give라는 이름으로 name을 전달합니다.
+            // 참고) POST 방식이므로 data: {'name_give': name} 과 같은 양식이 되어야합니다!
             $.ajax({
                 type: "POST",
-                url: "/api/list/count",
-                data
-            })
+                url: "/api/like",
+                data: {'title_give': name},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // 2. '좋아요 완료!' 얼럿을 띄웁니다.
+                        // alert('좋아요 완료!')
+                        // 3. 변경된 정보를 반영하기 위해 새로고침합니다. 중요!
+                        window.location.reload()
+                    }
+                }
+            });
         }
 
 
