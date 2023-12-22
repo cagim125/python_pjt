@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <!-- Webpage Title -->
-    <title>나홀로 메모장</title>
+    <title>1페이지 홈쇼핑</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -21,131 +21,186 @@
 
     <!-- 구글폰트 -->
     <link href="https://fonts.googleapis.com/css?family=Do+Hyeon&display=swap" rel="stylesheet">
+    <!--Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="../static/decorate.css"/>
 
-        <style type="text/css">
-          * {
-                font-family: "Stylish", sans-serif;
-            }
-            .wrap {
-                width: 900px;
-                margin: auto;
-            }
-            .comment {
-                color: blue;
-                font-weight: bold;
-            }
-            #post-box {
-                width: 500px;
-                margin: 20px auto;
-                padding: 50px;
-                border: black solid;
-                border-radius: 5px;
-            }
-    </style>
     <script>
-        $(document).ready(function() {
-            $("#cards-box").html("")
-            showArticles();
-        });
+        function order_complete() {
+            let name = $("#customerName").val();
+            let addr = $("#customerAddress").val();
+            let phone = $("#customerPhone").val();
+            //let count = $("#inputGroupSelect01 option:selected").val();
 
-        function openClose() {
-                // id 값 post-box의 display 값이 block 이면(= 눈에 보이면)
-                if ( $("#post-box").css("display")=="block") {
-                    // post-box를 가리고
-                    $("#post-box").hide();
-                    // 다시 버튼을 클릭하면, 박스 열기를 할 수 있게 텍스트 바꿔두기
-                    $("#btn-post-box").text("포스팅 박스 열기");
-                } else {
-                    // 아니면(눈에 보이지 않으면) post-box를 펴라
-                    $("#post-box").show();
-                    // 다시 버튼을 클릭하면, 박스 닫기를 할 수 있게 텍스트 바꿔두기
-                    $("#btn-post-box").text("포스팅 박스 닫기");
-                }
-            }
-
-        function postArticle() {
-            let url = $("#post-url").val();
-            let comment = $("#post-comment").val();
-
-            //2.memo에 POST방식으로 메모 생성 요청하기
-            $.ajax({
-                type: "POST",
-                url: "/memo",
-                data: {url_give: url, comment_give: comment},
-                success: function(response) {
-                    if (response["result"] == "success") {
-                        alert("포스팅 성공!")
-                        //3. 성공 시 페이지 새로고침하기
-                        window.location.reload();
-                    }else{
-                        alert("포스팅 실패!");
+            if (name == "") {
+                alert("주문자 성함을 입력해주세요.");
+            } else if (addr == "") {
+                alert("주소를 입력해주세요.");
+            } else if (phone == "") {
+                alert("핸드폰 번호를 입력해주세요.")
+            } //else if (count == "") {
+                // alert("수량이 입력해주세요.");
+            // }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {
+                        "name_give": name,
+                        "addr_give": addr,
+                        "phone_give": phone,
+                        // "count_give": count
+                    },
+                    success: function (response) {
+                        if (response["result"] == "success") {
+                            alert(response["msg"]);
+                            window.location.reload();
+                        } else {
+                            alert("처리중 오류가 발생했습니다. 1분후 다시 시도해주세요.");
+                        }
                     }
-                }
-            })
+                });
+                // 주문 완료 후 폼 초기화
+                // $("#customerName").val('');
+                // $("#customerAddress").val('');
+                // $("#customerPhone").val('');
+                // $("#inputGroupSelect01").val('');
+
+                //     function checkPhone(number) {
+                //         var regPhone = /010[-]\d{4}[-]\d{4}$/g;
+                //         return regPhone.test(number);
+                //     }
+                // }
+
+            }
         }
-        function showArticles() {
+
+        $(document).ready(function () {
+            $('#dwrate').empty()
             $.ajax({
                 type: "GET",
-                url: "/memo",
+                url: "https://api.manana.kr/exchange/rate.json",
                 data: {},
-                success: function(response){
-                    let article = response["article"];
-                    console.log(article);
-                    for(let i = 0; i < article.length; i++){
-                        makeCard(article[i]["image"],article[i]["url"],article[i]["title"],article[i]["desc"],article[i]["comment"]);
-                    }
+                success: function (response) {
+                    let check = response[1]["rate"]
+                    let addrate = `<h6>달러-원 환율 : ${check}</h6>`
+                    $('#dwrate').append(addrate);
                 }
             })
-        }
-        function makeCard(image, url, title, desc, comment) {
-                let tempHtml = `<div class="card">
-                        <img class="card-img-top" src="${image}" alt="Card image cap">
-                        <div class="card-body">
-                        <a href="${url}" target="_blank" class="card-title">${title}</a>
-                        <p class="card-text">${desc}</p>
-                        <p class="card-text comment">${comment}</p>
-                        </div>
-                    </div>`;
-                $("#cards-box").append(tempHtml);
-            }
+            $("#addOrders").empty();
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        let data = response['data']
+                        for (let i = 0; data.length; i++) {
+                            let custNameOrder = data[i]["name"];
+                            let custAddrOrder = data[i]["address"];
+                            let custPhoneOrder = data[i]["phone"];
+
+                            let addData = `
+                                          <tr>
+                                            <td>${custNameOrder}</td>
+                                            <td>${custAddrOrder}</td>
+                                            <td>${custPhoneOrder}</td>
+                                           </tr>
+                                            `;
+                            $("#addOrders").append(addData);
+
+                        }
+                    }
+
+                }
+            })
+
+        });
+
+
     </script>
 </head>
 <body>
+<!--entire site attribute-->
 <div class="wrap">
-    <div class="jumbotron">
-        <h1 class="display-4">나홀로 링크 메모장!</h1>
-        <p class="lead">중요한 링크를 저장해두고, 나중에 볼 수 있는 공간입니다</p>
-        <hr class="my-4">
-        <p class="lead">
-            <button onclick="openClose()" id="btn-post-box" type="button" class="btn btn-primary">포스팅 박스 열기</button>
-        </p>
+
+    <!--image-->
+    <div class="form_desgin">
+        <img src="../static/ipadpro.jpg" class="image_design" alt="ipad"/>
     </div>
-    <div id="post-box" class="form-post" style="display:none">
-        <div>
-            <div class="form-group">
-                <label for="post-url">아티클 URL</label>
-                <input id="post-url" class="form-control" placeholder="">
-            </div>
-            <div class="form-group">
-                <label for="post-comment">간단 코멘트</label>
-                <textarea id="post-comment" class="form-control" rows="2"></textarea>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="postArticle()">기사저장</button>
+
+    <!--description-->
+    <div class="form_desgin">
+        <h1>iPad Pro (12.9) Gen1 128GB Cellular</h1>
+        <h3>가격: 499,000원</h3>
+        <h6>리퍼 아이패드 프로 1세대 12.9 입니다. 동영상 편집이나 프로그래밍에는 맞지 않지만, 넷플릭스 머신이나 인터넷 서핑용, 수업 필기용으로 적당합니다. 사은품으로 애플펜슬(1세대)를 함께
+            드립니다. </h6>
+    </div>
+
+    <!--order form-->
+    <div class="form_desgin">
+
+        <!--doller-won rate-->
+        <div class="emphasize" id="dwrate">
         </div>
-    </div>
-    <div id="cards-box"  class="card-columns" >
-        <div class="card">
-            <img class="card-img-top"
-                 src="https://www.eurail.com/content/dam/images/eurail/Italy%20OCP%20Promo%20Block.adaptive.767.1535627244182.jpg"
-                 alt="Card image cap">
-            <div class="card-body">
-                <a href="#" class="card-title">여기 기사 제목이 들어가죠</a>
-                <p class="card-text">기사의 요약 내용이 들어갑니다. 동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라만세 무궁화 삼천리 화려강산...</p>
-                <p class="card-text comment">여기에 코멘트가 들어갑니다.</p>
+
+        <!--order form main information-->
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">주문자 성함: </span>
             </div>
+            <input id="customerName" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
         </div>
+
+        <!--        <div class="input-group mb-3">-->
+        <!--            <div class="input-group-prepend">-->
+        <!--                <label class="input-group-text" for="inputGroupSelect01">수량: </label>-->
+        <!--            </div>-->
+        <!--            <select class="custom-select" id="inputGroupSelect01">-->
+        <!--                <option selected></option>-->
+        <!--                <option value="1">1개</option>-->
+        <!--                <option value="2">2개</option>-->
+        <!--                <option value="3">3개</option>-->
+        <!--            </select>-->
+        <!--        </div>-->
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">주소: </span>
+            </div>
+            <input id="customerAddress" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">전화번호: </span>
+            </div>
+            <input id="customerPhone" type="text" class="form-control" aria-label="Default"
+                   aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <button onclick="order_complete()" type="button" class="center btn btn-outline-secondary">주문하기</button>
+
     </div>
+
+    <!--order list-->
+    <div class="form_desgin">
+        <table class="table">
+            <thead>
+            <tr style="text-align: center">
+                <th scope="col">주문자 성함</th>
+                <th scope="col">주소</th>
+                <th scope="col">전화번호</th>
+            </tr>
+            </thead>
+            <tbody id="addOrders" style="text-align: center">
+            </tbody>
+        </table>
+    </div>
+
 </div>
+
 </body>
 
 </html>

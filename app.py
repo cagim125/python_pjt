@@ -8,11 +8,41 @@ DB_HOST = 'localhost:27017'
 client = MongoClient(DB_HOST)
 db = client.sparta
 
+# daum_url = "https://movie.daum.net/ranking/reservation"
+
 ## HTML을 주는 부분
 @app.route('/')
 def home(): #함수명수정-이름만보고접속되는페이지를확인할수있게!
-    return render_template('index.html')
+    return render_template('movie.html')
 
+@app.route('/api/list', methods=['GET'])
+def api_list():
+    db = client.daum_movie
+    movie = list(db.movie.find({}, {'_id': 0}))
+    return jsonify({'result':'success' ,'data': movie})
+
+
+@app.route("/order", methods=['POST'])
+def write_order():
+    # 1.클라이언트로 부터 넘어온 데이터 받기
+    name_recieve = request.form["name_give"]
+    addr_recieve = request.form["addr_give"]
+    phone_recieve = request.form["phone_give"]
+    # count_recieve = request.form["count_give"]
+
+    order = {
+        "name": name_recieve,
+        "address": addr_recieve,
+        "phone": phone_recieve,
+        # "count": count_recieve
+    }
+    db.orders.insert_one(order)
+
+    return jsonify({'result': 'success', 'msg': '주문이 정상적으로 완료되었습니다.'})
+@app.route("/order", methods=['GET'])
+def get_orders():
+    order_list = list(db.orders.find({},{'_id': 0}))
+    return jsonify({'result': 'success', 'data': order_list})
 ## API 역할을 하는 부분
 @app.route("/memo", methods=['POST'])
 def write_memo():

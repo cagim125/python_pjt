@@ -1,4 +1,58 @@
+/*site font (google)*/
 * {
-    color: blue;
-    border-bottom: aqua;
+   font-family: 'Crimson Pro', serif;
+    /*font-size: 30px;*/
+}
+
+/*Entire form disign*/
+.wrap {
+    margin: auto;
+    width: 1050px;
+}
+
+h1,h3 {
+    text-align: center;
+}
+
+ol {
+    color: black;
+    padding: 5px;
+    margin: auto;
+    list-style:none;
+}
+li {
+    float: left;
+    padding: 5px;
+
+}
+
+.card-body {
+    padding: 5px;
+    margin: auto;
+}
+
+.card-title {
+    width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 1.5em;
+    padding-top: 5px;
+    padding-bottom: 1px;
+
+}
+
+/*image design*/
+.card-img-top {
+    /*display: block, margin:auto 2개를 넣으니 가운데 정렬 됨*/
+    display: block;
+    /*margin: auto;*/
+    width: 190px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 5%;
+}
+
+.txt_info {
+    padding-top: 1px;
 }

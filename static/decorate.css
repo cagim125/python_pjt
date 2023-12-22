@@ -1,0 +1,35 @@
+/*site font (google)*/
+* {
+    font-family: 'Noto Serif KR', serif;
+}
+
+/*Entire form disign*/
+.wrap {
+    margin: auto;
+    width: 750px;
+}
+
+/*Every div design*/
+.form-design {
+    padding: 10px;
+}
+/*image design*/
+.image_design {
+    /*display: block, margin:audo 2개를 넣으니 가운데 정렬 됨*/
+    display: block;
+    margin: auto;
+    width: 650px;
+    background-size: cover;
+    background-position: center;
+}
+
+/* 달러-원 환율 색깔 */
+.emphasize {
+    color: blue;
+}
+
+/* 주문하기 버튼 */
+.center {
+    display: block;
+    margin: auto;
+}

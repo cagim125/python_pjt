@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Webpage Title -->
+    <title>1페이지 홈쇼핑</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+
+    <!-- 구글폰트 -->
+    <link href="https://fonts.googleapis.com/css?family=Do+Hyeon&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro">
+    <!--Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="../static/style.css"/>
+
+    <script>
+        let count;
+        $(document).ready(function () {
+            $('#list_movieranking').html('');
+            $.ajax({
+                type: "GET",
+                url: "/api/list",
+                data: {},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        let data = response['data']
+                        for (let i = 0; data.length; i++) {
+                            let movie_title = data[i]["title"];
+                            let movie_img_url = data[i]["image"];
+                            let movie_year = data[i]["year"];
+                            let movie_url = data[i]["url"];
+                            let movie_like = data[i]["like"];
+
+                            let addList =
+                                `
+
+                                        <li>
+                                            <a href=${movie_url}>
+                                            <img class="card-img-top" src=${movie_img_url} alt="Card image cap">
+                                            </a>
+                                            <div class="card-body">
+                                                    <h5 class="card-title">${movie_title}</h5>
+                                                 <span>
+                                                 <img  onclick="counter()" alt="heart" src="../static/heart.jpg" width="30" height="30"/>
+                                                  <p>${movie_like}</p>
+                                                </span>
+                                                <div class="txt_tump">
+                                                 <span class="txt_info">
+                                                    개봉
+                                                 <span class="txt_num">${movie_year}</span>
+                                                </div>
+                                             </span>
+                                              </div>
+                                        </li>
+
+                                            `;
+                            $("#list_movieranking").append(addList);
+                        }
+                    }
+                }
+            })
+        });
+        function counter() {
+
+            $.ajax({
+                type: "POST",
+                url: "/api/list/count",
+                data
+            })
+        }
+
+
+    </script>
+</head>
+
+<body>
+<div class="wrap">
+    <h1> 랭킹 </h1>
+    <h3> 영화 순위 </h3>
+    <hr/>
+    <div id="cards-info">
+        <ol id="list_movieranking">
+            <li>
+                <img class="card-img-top" src=${movie_img_url} alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title">${movie_title}</h5>
+                    <span class="txt_info">
+                        개봉
+                        <span class="txt_num">${movie_year}</span>
+                    </span>
+                </div>
+            </li>
+        </ol>
+    </div>
+</div>
+</body>
+
+</html>
