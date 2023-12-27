@@ -85,6 +85,15 @@ def fmkorea(url):
             print(finalDealLink)
             print(finalDealDate)
 
+            with conn.cursor() as curs:
+                sql = "insert into product_data(title, link, date, source) values(%s, %s, %s, %s)"
+                curs.execute(sql, (finalDealTitle, finalDealLink, finalDealDate, 'fmkorea'))
+
+                conn.commit()
+
+    conn.close()
+
+
 # 당일이면 시간, 당일이 아니면 날짜로 가져온다.
 def extractDate(a):
     if ":" in a:
@@ -102,11 +111,11 @@ def extractDate(a):
 # 페이지별 스크래핑
 addr1 = "https://quasarzone.com/bbs/qb_saleinfo?page=1"
 # addr2 = "https://quasarzone.com/bbs/qb_saleinfo?page=2"
-quasarzone(addr1)
+# quasarzone(addr1)
 # quasarzone(addr2)
 # curs.close()
-# address1 = "https://www.fmkorea.com/index.php?mid=hotdeal&listStyle=list&page=1"
-# fmkorea(address1)
+address1 = "https://www.fmkorea.com/index.php?mid=hotdeal&listStyle=list&page=1"
+fmkorea(address1)
 # addr = "https://store.kakao.com/home/best"
 # kakao(addr)
 

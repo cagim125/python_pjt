@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <!-- Webpage Title -->
-    <title>1페이지 홈쇼핑</title>
+    <title>오늘의 특가</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -83,14 +83,14 @@
                 success: function (response) {
                     if (response["result"] === "success") {
                         let data = response["product_data"]
-                        for (let i=0; data.length; i++) {
+                        for (let i = 0; data.length; i++) {
                             let cusTitle = data[i]["title"]
                             let cusLink = data[i]["link"]
                             let cusSource = data[i]["source"]
                             let cusDate = data[i]["date"]
 
                             let addData = `
-                                    <tr>
+                                    <tr class="container">
                                      <th scope="row"></th>
                                      <td>
                                         <a class="subject-link" href=${cusLink}>
@@ -111,29 +111,60 @@
             })
 
 
-
         });
     </script>
     <style>
+        @font-face {
+            font-family: 'TmoneyRoundWindRegular';
+            src: url("https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.1/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css");
+            /*src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-07@1.0/TmoneyRoundWindRegular.woff') format('woff');*/
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
-            font-family: 'Crimson Pro', serif;
+            font-family: "Do Hyeon", sans-serif;
+
         }
 
         .title {
             background-color: antiquewhite;
-            margin: 20px;
-            padding: 15px;
-
+            margin: 15px;
+            padding: 20px;
         }
 
         .text1 {
-            text-align: left;
+            /*text-align: left;*/
             font-weight: bold;
             opacity: 0.5;
         }
+
         #InputSearch {
-            text-align: left;
+            text-align: center;
         }
+
+        .container {
+            width: 800px;
+            height: 70px;
+        }
+
+        .container:hover {
+            background: #DDECEE;
+        }
+
+        /*body {*/
+        /*    margin: 0;*/
+        /*    padding: 0;*/
+        /*    position: relative;*/
+        /*    height: 100%;*/
+        /*    !*background: white;*!*/
+        /*    font-family: 'TmoneyRoundWindRegular', sans-serif;*/
+        /*    font-weight: 300;*/
+        /*    font-size: 17px;*/
+        /*    color: #777;*/
+        /*}*/
+
+
     </style>
 </head>
 <body>
@@ -148,8 +179,8 @@
         </div>
         <form>
             <div class="form-group row">
-                <label for="InputSearch" class="col-sm-3 col-form-label">단어로 검색하기 : </label>
-                <div class="col-sm-7">
+                <label for="InputSearch" class="col-sm-2 col-form-label">단어로 검색하기 : </label>
+                <div class="col-sm-2">
                     <input type="text" class="form-control" id="InputSearch">
                 </div>
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -158,16 +189,16 @@
     </div>
 
 
-  <table class="table">
-  <tbody id="list">
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-  </tbody>
-</table>
+    <table class="table">
+        <tbody id="list">
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+        </tr>
+        </tbody>
+    </table>
 
 </div>
 

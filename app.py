@@ -17,16 +17,23 @@ def home(): #함수명수정-이름만보고접속되는페이지를확인할수
 
 @app.route('/get_spdb')
 def get_spdb():
-    # product_data 테이블에서 모든 데이터를 가져온다, date 기준 내림차순으로 정렬한다.
-    sql = "SELECT * FROM product_data ORDER BY date DESC"
     # cursor() 생성
     curs = conn.cursor()
+    # product_data 테이블에서 모든 데이터를 가져온다, date 기준 내림차순으로 정렬한다.
+
+    removeDuptitle = "DELETE a FROM product_data a, product_data b WHERE a.id > b.id AND a.title = b.title;"
+    curs.execute(removeDuptitle)
+    removeDupLink = "DELETE a FROM product_data a, product_data b WHERE a.id > b.id AND a.link = b.link;"
+    curs.execute(removeDupLink)
+    removeShortTitle = "DELETE from product_data where char_length(title) <= 8;"
+    curs.execute(removeShortTitle)
+    conn.commit()
     # sql 문 실행
+    sql = "SELECT * FROM product_data ORDER BY date DESC"
     curs.execute(sql)
     # 데이터 가져오기
     datas = list(curs.fetchall())
     # DB 접속 종료
-
 
         # 최종 결과물을 담을 리스트 변수를 선언한다.
     result = []
