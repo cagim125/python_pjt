@@ -2,10 +2,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import re
 import pymysql.cursors
+import time
 
 ### DB Connection ###
 conn = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="1234", db="data", charset="utf8")
-curs = conn.cursor()
+date = time.strftime("%Y%m%d", time.localtime())
 
 ## 셀레니움 스크래핑 기본정보 ##
 option = webdriver.ChromeOptions()
@@ -17,21 +18,20 @@ browser.maximize_window()
 
 # 퀘이사존 스크래핑 함수 제작
 def quasarzone(url):
-
     # 데이터 가공
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, "lxml")
     # 필요한 데이터 가져오기. 원하는 데이터가 모두 포함된 가장 적절한 태그는 tr 이다.
     # 그 위의 <tbody>를 하지 않는 이유는, 데이터가 리스트화되지 않고 한개의 뭉텅이가 되어서 스크래핑시 하나밖에 못가져온다.
     datas = soup.find_all("tr")
-
+    # print(datas)
     # 스크래핑 시작
     for data in datas:
-
         # 각 데이터에 대한 변수 선언
         dealTitle = data.find("a", attrs={"class": "subject-link"})  # 제목
         dealLink = data.find("a", attrs={"class": "subject-link"})  # 글링크
         dealDate = data.find("span", attrs={"class": "date"})  # 날짜
+        # dealprice = data.find("span", attrs={"class": "text-orange"}) # 가격
         dealBlind = data.find("i", attrs={"class": "fa fa-lock"})  # 블라인드 처리된 글
 
         # 전체 데이터 중 None이 발생할 수 있어 None을 제거함
@@ -45,15 +45,20 @@ def quasarzone(url):
             finalDealTitle = dealTitle.text.strip()
             finalDealLink = "https://quasarzone.com/" + dealLink["href"]
             finalDealDate = dealDate.text.strip()
+            # finalDealPrice = dealprice.text.strip()
 
             print(finalDealTitle)
             print(finalDealLink)
             print(finalDealDate)
+            # print(finalDealPrice)
 
-            sql = "insert into product_data(title, link, date, source) values(%s, %s, %s, %s)"
-            curs.execute(sql, (finalDealTitle, finalDealLink, finalDealDate, '퀘이사존'))
+            with conn.cursor() as curs:
+                sql = "insert into product_data(title, link, date, source) values(%s, %s, %s, %s)"
+                curs.execute(sql, (finalDealTitle, finalDealLink, finalDealDate, 'quasarzone'))
 
-    conn.commit()
+                conn.commit()
+
+
     conn.close()
 
 
@@ -96,11 +101,12 @@ def extractDate(a):
 
 # 페이지별 스크래핑
 addr1 = "https://quasarzone.com/bbs/qb_saleinfo?page=1"
-addr2 = "https://quasarzone.com/bbs/qb_saleinfo?page=2"
+# addr2 = "https://quasarzone.com/bbs/qb_saleinfo?page=2"
 quasarzone(addr1)
-quasarzone(addr2)
-curs.close()
+# quasarzone(addr2)
+# curs.close()
 # address1 = "https://www.fmkorea.com/index.php?mid=hotdeal&listStyle=list&page=1"
 # fmkorea(address1)
-
+# addr = "https://store.kakao.com/home/best"
+# kakao(addr)
 

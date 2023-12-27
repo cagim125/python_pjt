@@ -1,19 +1,44 @@
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, jsonify, request
-from pymongo import MongoClient
+import pymysql
+import lxml
 
 app = Flask(__name__)
-DB_HOST = 'localhost:27017'
-client = MongoClient(DB_HOST)
-db = client.movieDB
+### DB Connection ###
+conn = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="1234", db="data", charset="utf8")
 
 # daum_url = "https://movie.daum.net/ranking/reservation"
 
 ## HTML을 주는 부분
 @app.route('/')
 def home(): #함수명수정-이름만보고접속되는페이지를확인할수있게!
-    return render_template('movie.html')
+    return render_template('index.html')
+
+@app.route('/get_spdb')
+def get_spdb():
+    # product_data 테이블에서 모든 데이터를 가져온다, date 기준 내림차순으로 정렬한다.
+    sql = "SELECT * FROM product_data ORDER BY date DESC"
+    # cursor() 생성
+    curs = conn.cursor()
+    # sql 문 실행
+    curs.execute(sql)
+    # 데이터 가져오기
+    datas = list(curs.fetchall())
+    # DB 접속 종료
+
+
+        # 최종 결과물을 담을 리스트 변수를 선언한다.
+    result = []
+
+        # DB 검색 결과를 딕셔너리 형태로 재생성한다.
+    for data in datas:
+        parsed_data = {'id': data[0], 'title': data[1], 'link': data[2], 'source': data[3], 'date': data[4],
+                           'thumbnail': data[5]}
+        result.append(parsed_data)
+
+
+    return jsonify({'result': 'success', 'product_data': result})
 
 @app.route('/api/list', methods=['GET'])
 def api_list():
@@ -128,3 +153,4 @@ def read_review():
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
+    conn.close()

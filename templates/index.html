@@ -22,7 +22,7 @@
     <!-- 구글폰트 -->
     <link href="https://fonts.googleapis.com/css?family=Do+Hyeon&display=swap" rel="stylesheet">
     <!--Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="../static/decorate.css"/>
+    <!--    <link rel="stylesheet" type="text/css" href="../static/decorate.css"/>-->
 
     <script>
         function order_complete() {
@@ -75,129 +75,99 @@
         }
 
         $(document).ready(function () {
-            $('#dwrate').empty()
+            $('#list').empty()
             $.ajax({
                 type: "GET",
-                url: "https://api.manana.kr/exchange/rate.json",
+                url: "/get_spdb",
                 data: {},
                 success: function (response) {
-                    let check = response[1]["rate"]
-                    let addrate = `<h6>달러-원 환율 : ${check}</h6>`
-                    $('#dwrate').append(addrate);
-                }
-            })
-            $("#addOrders").empty();
-            $.ajax({
-                type: "GET",
-                url: "/order",
-                data: {},
-                success: function (response) {
-                    if (response["result"] == "success") {
-                        let data = response['data']
-                        for (let i = 0; data.length; i++) {
-                            let custNameOrder = data[i]["name"];
-                            let custAddrOrder = data[i]["address"];
-                            let custPhoneOrder = data[i]["phone"];
+                    if (response["result"] === "success") {
+                        let data = response["product_data"]
+                        for (let i=0; data.length; i++) {
+                            let cusTitle = data[i]["title"]
+                            let cusLink = data[i]["link"]
+                            let cusSource = data[i]["source"]
+                            let cusDate = data[i]["date"]
 
                             let addData = `
-                                          <tr>
-                                            <td>${custNameOrder}</td>
-                                            <td>${custAddrOrder}</td>
-                                            <td>${custPhoneOrder}</td>
-                                           </tr>
-                                            `;
-                            $("#addOrders").append(addData);
+                                    <tr>
+                                     <th scope="row"></th>
+                                     <td>
+                                        <a class="subject-link" href=${cusLink}>
+                                             ${cusTitle}
+                                        </a>
+                                        <div>
+                                            ${cusSource}/${cusDate}
+                                        </div>
+                                    </td>
+                                    </tr>
 
+                            `
+                            $("#list").append(addData)
                         }
                     }
 
                 }
             })
 
+
+
         });
-
-
     </script>
+    <style>
+        * {
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .title {
+            background-color: antiquewhite;
+            margin: 20px;
+            padding: 15px;
+
+        }
+
+        .text1 {
+            text-align: left;
+            font-weight: bold;
+            opacity: 0.5;
+        }
+        #InputSearch {
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
 <!--entire site attribute-->
 <div class="wrap">
-
-    <!--image-->
-    <div class="form_desgin">
-        <img src="../static/ipadpro.jpg" class="image_design" alt="ipad"/>
-    </div>
-
-    <!--description-->
-    <div class="form_desgin">
-        <h1>iPad Pro (12.9) Gen1 128GB Cellular</h1>
-        <h3>가격: 499,000원</h3>
-        <h6>리퍼 아이패드 프로 1세대 12.9 입니다. 동영상 편집이나 프로그래밍에는 맞지 않지만, 넷플릭스 머신이나 인터넷 서핑용, 수업 필기용으로 적당합니다. 사은품으로 애플펜슬(1세대)를 함께
-            드립니다. </h6>
-    </div>
-
-    <!--order form-->
-    <div class="form_desgin">
-
-        <!--doller-won rate-->
-        <div class="emphasize" id="dwrate">
+    <div class="title">
+        <div class="text1">
+            <h1>오늘의 특가</h1>
+            <p>이 페이지는 여러 커뮤니티의 특가, 알뜰구매 정보를 모아놓은 사이트입니다.</p>
+            <p>소스 사이트 : 퀘사이존,에펨코리아,뽐뿌,루리웹,클리앙 (이후 추가 예정)</p>
+            <hr/>
         </div>
-
-        <!--order form main information-->
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">주문자 성함: </span>
+        <form>
+            <div class="form-group row">
+                <label for="InputSearch" class="col-sm-3 col-form-label">단어로 검색하기 : </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="InputSearch">
+                </div>
+                <button type="submit" class="btn btn-primary">확인</button>
             </div>
-            <input id="customerName" type="text" class="form-control" aria-label="Default"
-                   aria-describedby="inputGroup-sizing-default">
-        </div>
-
-        <!--        <div class="input-group mb-3">-->
-        <!--            <div class="input-group-prepend">-->
-        <!--                <label class="input-group-text" for="inputGroupSelect01">수량: </label>-->
-        <!--            </div>-->
-        <!--            <select class="custom-select" id="inputGroupSelect01">-->
-        <!--                <option selected></option>-->
-        <!--                <option value="1">1개</option>-->
-        <!--                <option value="2">2개</option>-->
-        <!--                <option value="3">3개</option>-->
-        <!--            </select>-->
-        <!--        </div>-->
-
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">주소: </span>
-            </div>
-            <input id="customerAddress" type="text" class="form-control" aria-label="Default"
-                   aria-describedby="inputGroup-sizing-default">
-        </div>
-
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">전화번호: </span>
-            </div>
-            <input id="customerPhone" type="text" class="form-control" aria-label="Default"
-                   aria-describedby="inputGroup-sizing-default">
-        </div>
-
-        <button onclick="order_complete()" type="button" class="center btn btn-outline-secondary">주문하기</button>
-
+        </form>
     </div>
 
-    <!--order list-->
-    <div class="form_desgin">
-        <table class="table">
-            <thead>
-            <tr style="text-align: center">
-                <th scope="col">주문자 성함</th>
-                <th scope="col">주소</th>
-                <th scope="col">전화번호</th>
-            </tr>
-            </thead>
-            <tbody id="addOrders" style="text-align: center">
-            </tbody>
-        </table>
-    </div>
+
+  <table class="table">
+  <tbody id="list">
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+  </tbody>
+</table>
 
 </div>
 
